@@ -19,7 +19,7 @@ WORD_LENGTH = 5
 # load words and then encode
 filename = pkg_resources.resource_filename(
     'gym_wordle',
-    'data/5_words.txt'
+    'data/smallset.txt'
 )
 
 def encodeToStr(encoding):
