@@ -88,6 +88,23 @@ class WordleEnv(gym.Env):
         })
         self.guesses = []
 
+    def custom_file(self, filename):
+        global WORDS, TRAIN_WORDS, TEST_WORDS
+        # Get user provided file
+        if filename:
+            # Update the WORDS list
+            resource_filename = pkg_resources.resource_filename(
+                'gym_wordle',
+                'data/'+filename+'.txt'
+            )
+            with open(resource_filename, "r") as f:
+                WORDS = strToEncode(f.readlines())
+        print("Using file " + filename + " with " + str(len(WORDS)) + " words.")
+        random.shuffle(WORDS)
+        length = int(0.8 * len(WORDS))
+        TRAIN_WORDS = WORDS[:length]
+        TEST_WORDS = WORDS[length:]
+
     def step(self, action):
         assert self.action_space.contains(action)
 
@@ -132,13 +149,20 @@ class WordleEnv(gym.Env):
     def _get_obs(self):
         return {'board': self.board, 'alphabet': self.alphabet}
 
-    def reset(self, seed: Optional[int] = None):
+    def reset(self, mode: Optional[int] = 0, user_word: Optional[str] = None, seed: Optional[int] = None):
+        global TRAIN_WORDS, TEST_WORDS
         # super().reset(seed=seed)
-        self.hidden_word = random.choice(WORDS)
-        word = []
-        for num in self.hidden_word:
-            word.append(chr(num + 97))
-        print("Hidden Word from Gym: ", word)
+        if user_word:
+            self.hidden_word = strToEncode([user_word])[0]
+            print("Using user word: ", user_word)
+        else:
+            if mode == 0:
+                # Train mode
+                self.hidden_word = random.choice(TRAIN_WORDS)
+            else:
+                # Test mode
+                self.hidden_word = random.choice(TEST_WORDS)
+            # print("Hidden word from gym: ", encodeToStr(self.hidden_word))
         self.guesses_left = GAME_LENGTH
         self.board = np.negative(
             np.ones(shape=(GAME_LENGTH, WORD_LENGTH), dtype=int))
