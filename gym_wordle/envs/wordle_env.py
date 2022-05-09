@@ -135,6 +135,10 @@ class WordleEnv(gym.Env):
     def reset(self, seed: Optional[int] = None):
         # super().reset(seed=seed)
         self.hidden_word = random.choice(WORDS)
+        word = []
+        for num in self.hidden_word:
+            word.append(chr(num + 97))
+        print("Hidden Word from Gym: ", word)
         self.guesses_left = GAME_LENGTH
         self.board = np.negative(
             np.ones(shape=(GAME_LENGTH, WORD_LENGTH), dtype=int))
